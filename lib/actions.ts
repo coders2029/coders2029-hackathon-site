@@ -1,6 +1,7 @@
 "use server";
 
-import { query } from "@/lib/db/pool";
+import { prisma } from "@/lib/db/prisma";
+import type { Branch, Participation } from "@prisma/client";
 import { z } from "zod";
 
 /* ─── Helpers ─── */
@@ -33,7 +34,7 @@ const memberSchema = z.object({
 const registerSchema = z.object({
   participation: z.enum(["solo", "team"]),
   teamName: z.string().optional(),
-  techStack: z.enum(["react", "vue", "svelte", "vanilla", "other"]),
+  branch: z.enum(["CE", "CSE", "EXTC"]),
   member: memberSchema,
 });
 
@@ -59,14 +60,16 @@ export async function registerTeam(
     return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const { participation, teamName, techStack, member } = parsed.data;
+  const { participation, teamName, branch, member } = parsed.data;
   const maxMembers = participation === "solo" ? 1 : 3;
 
   // Check if roll number or email already registered
-  const existing = await query`
-    SELECT id FROM members WHERE roll_number = ${member.rollNumber} OR email = ${member.email}
-  `;
-  if (existing.rows.length > 0) {
+  const existing = await prisma.member.findFirst({
+    where: {
+      OR: [{ rollNumber: member.rollNumber }, { email: member.email }],
+    },
+  });
+  if (existing) {
     return {
       success: false,
       error: "This roll number or email is already registered.",
@@ -77,27 +80,33 @@ export async function registerTeam(
   let joinCode = generateJoinCode();
   let attempts = 0;
   while (attempts < 10) {
-    const dup = await query`SELECT id FROM teams WHERE join_code = ${joinCode}`;
-    if (dup.rows.length === 0) break;
+    const dup = await prisma.team.findUnique({ where: { joinCode } });
+    if (!dup) break;
     joinCode = generateJoinCode();
     attempts++;
   }
 
-  // Insert team
-  const teamResult = await query`
-    INSERT INTO teams (team_name, join_code, participation, tech_stack, max_members)
-    VALUES (${teamName || null}, ${joinCode}, ${participation}, ${techStack}, ${maxMembers})
-    RETURNING id
-  `;
-  const teamId = teamResult.rows[0].id as string;
+  // Create team + lead member in a single transaction
+  const team = await prisma.team.create({
+    data: {
+      teamName: teamName || null,
+      joinCode,
+      participation: participation as Participation,
+      branch: branch as Branch,
+      maxMembers,
+      members: {
+        create: {
+          fullName: member.fullName,
+          rollNumber: member.rollNumber,
+          email: member.email,
+          githubUrl: member.github,
+          isLead: true,
+        },
+      },
+    },
+  });
 
-  // Insert lead member
-  await query`
-    INSERT INTO members (team_id, full_name, roll_number, email, github_url, is_lead)
-    VALUES (${teamId}, ${member.fullName}, ${member.rollNumber}, ${member.email}, ${member.github}, true)
-  `;
-
-  return { success: true, joinCode, teamId };
+  return { success: true, joinCode, teamId: team.id };
 }
 
 /* ─── Join Team (teammate enters code) ─── */
@@ -116,35 +125,31 @@ export async function joinTeam(
 
   const { joinCode, member } = parsed.data;
 
-  // Find team
-  const teamResult = await query`
-    SELECT id, team_name, max_members, participation FROM teams WHERE join_code = ${joinCode}
-  `;
-  if (teamResult.rows.length === 0) {
+  // Find team with member count
+  const team = await prisma.team.findUnique({
+    where: { joinCode },
+    include: { _count: { select: { members: true } } },
+  });
+  if (!team) {
     return { success: false, error: "Invalid join code. Check with your team lead." };
   }
-
-  const team = teamResult.rows[0];
 
   if (team.participation === "solo") {
     return { success: false, error: "This is a solo registration — no teammates allowed." };
   }
 
-  // Check current member count
-  const countResult = await query`
-    SELECT COUNT(*) as count FROM members WHERE team_id = ${team.id}
-  `;
-  const currentCount = Number.parseInt(countResult.rows[0].count as string, 10);
-
-  if (currentCount >= (team.max_members as number)) {
+  const currentCount = team._count.members;
+  if (currentCount >= team.maxMembers) {
     return { success: false, error: "Team is already full (max 3 members)." };
   }
 
   // Check if roll number or email already registered
-  const existing = await query`
-    SELECT id FROM members WHERE roll_number = ${member.rollNumber} OR email = ${member.email}
-  `;
-  if (existing.rows.length > 0) {
+  const existing = await prisma.member.findFirst({
+    where: {
+      OR: [{ rollNumber: member.rollNumber }, { email: member.email }],
+    },
+  });
+  if (existing) {
     return {
       success: false,
       error: "This roll number or email is already registered.",
@@ -152,14 +157,20 @@ export async function joinTeam(
   }
 
   // Insert member
-  await query`
-    INSERT INTO members (team_id, full_name, roll_number, email, github_url, is_lead)
-    VALUES (${team.id}, ${member.fullName}, ${member.rollNumber}, ${member.email}, ${member.github}, false)
-  `;
+  await prisma.member.create({
+    data: {
+      teamId: team.id,
+      fullName: member.fullName,
+      rollNumber: member.rollNumber,
+      email: member.email,
+      githubUrl: member.github,
+      isLead: false,
+    },
+  });
 
   return {
     success: true,
-    teamName: team.team_name as string | null,
+    teamName: team.teamName,
     memberCount: currentCount + 1,
   };
 }

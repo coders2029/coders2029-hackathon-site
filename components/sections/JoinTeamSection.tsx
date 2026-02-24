@@ -99,8 +99,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
           // join_team
         </p>
         <h2 className="text-3xl font-bold sm:text-4xl">
-          Join Your{" "}
-          <span className="text-cyan-glow text-glow-cyan">Team</span>
+          Join Your <span className="text-cyan-glow text-glow-cyan">Team</span>
         </h2>
         <p className="mt-2 text-muted-foreground">
           Got a 6-character join code from your team lead? Enter it here to hop
@@ -220,34 +219,38 @@ export default function JoinTeamSection({ className }: { className?: string }) {
 
       {/* Success Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-violet-glow/20 bg-c29-surface">
-          <DialogHeader>
-            <DialogTitle className="text-violet-glow text-glow-violet text-xl">
+        <DialogContent className="border-violet-glow/20 bg-c29-surface sm:max-w-md">
+          <DialogHeader className="space-y-4">
+            <DialogTitle className="text-violet-glow text-glow-violet text-xl text-center">
               Welcome Aboard! 🚀
             </DialogTitle>
-            <DialogDescription asChild>
-              <div className="space-y-2 text-muted-foreground">
-                <p>
-                  You&apos;ve joined{" "}
-                  {teamInfo?.teamName ? (
-                    <strong className="text-foreground">
-                      {teamInfo.teamName}
-                    </strong>
-                  ) : (
-                    "the team"
-                  )}
-                  !
-                </p>
-                <p className="text-xs">
-                  Team now has{" "}
-                  <span className="font-mono text-cyan-glow">
-                    {teamInfo?.memberCount}/3
-                  </span>{" "}
-                  members. See you at the hackathon!
-                </p>
-              </div>
+            <DialogDescription className="sr-only">
+              Team join confirmation
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-4 pt-2 text-center">
+            <p className="text-muted-foreground">
+              You&apos;ve joined{" "}
+              {teamInfo?.teamName ? (
+                <strong className="text-foreground">{teamInfo.teamName}</strong>
+              ) : (
+                "the team"
+              )}
+              !
+            </p>
+            <div className="rounded-lg border border-violet-glow/30 bg-c29-bg p-4">
+              <p className="text-sm text-muted-foreground">
+                Team now has{" "}
+                <span className="font-mono text-lg font-bold text-cyan-glow">
+                  {teamInfo?.memberCount}/3
+                </span>{" "}
+                members
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              See you at the hackathon!
+            </p>
+          </div>
         </DialogContent>
       </Dialog>
     </section>

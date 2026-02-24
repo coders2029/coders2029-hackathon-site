@@ -47,8 +47,8 @@ const signupSchema = z.object({
   participation: z.enum(["solo", "team"], {
     error: "Select how you're participating",
   }),
-  techStack: z.enum(["react", "vue", "svelte", "vanilla", "other"], {
-    error: "Select a tech stack",
+  branch: z.enum(["CE", "CSE", "EXTC"], {
+    error: "Select your branch",
   }),
 });
 
@@ -69,7 +69,7 @@ export default function SignupSection({ className }: { className?: string }) {
       github: "",
       teamName: "",
       participation: undefined,
-      techStack: undefined,
+      branch: undefined,
     },
   });
 
@@ -79,7 +79,7 @@ export default function SignupSection({ className }: { className?: string }) {
       const result = await registerTeam({
         participation: data.participation,
         teamName: data.teamName,
-        techStack: data.techStack,
+        branch: data.branch,
         member: {
           fullName: data.fullName,
           rollNumber: data.rollNumber,
@@ -242,28 +242,30 @@ export default function SignupSection({ className }: { className?: string }) {
               )}
             />
 
-            {/* Tech Stack */}
+            {/* Branch */}
             <FormField
               control={form.control}
-              name="techStack"
+              name="branch"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tech Stack Preference</FormLabel>
+                  <FormLabel>Branch</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select your stack" />
+                        <SelectValue placeholder="Select your branch" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="react">React</SelectItem>
-                      <SelectItem value="vue">Vue</SelectItem>
-                      <SelectItem value="svelte">Svelte</SelectItem>
-                      <SelectItem value="vanilla">Vanilla JS</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="CE">Computer Engineering</SelectItem>
+                      <SelectItem value="CSE">
+                        Computer Science & Engineering
+                      </SelectItem>
+                      <SelectItem value="EXTC">
+                        Electronics & Telecomm
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -291,38 +293,41 @@ export default function SignupSection({ className }: { className?: string }) {
 
       {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-cyan-glow/20 bg-c29-surface">
-          <DialogHeader>
-            <DialogTitle className="text-cyan-glow text-glow-cyan text-xl">
+        <DialogContent className="border-cyan-glow/20 bg-c29-surface sm:max-w-md">
+          <DialogHeader className="space-y-4">
+            <DialogTitle className="text-cyan-glow text-glow-cyan text-xl text-center">
               You&apos;re In! 🎉
             </DialogTitle>
-            <DialogDescription asChild>
-              <div className="space-y-3 text-muted-foreground">
-                <p>Registration received. See you at the hackathon!</p>
-                {joinCode && (
-                  <div className="rounded-lg border border-cyan-glow/30 bg-c29-bg p-4 text-center">
-                    <p className="mb-1 text-xs uppercase tracking-widest text-cyan-glow">
-                      Your Join Code
-                    </p>
-                    <p className="font-mono text-3xl font-bold tracking-[0.3em] text-cyan-glow text-glow-cyan">
-                      {joinCode}
-                    </p>
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Share this code with your teammates so they can join at{" "}
-                      <a
-                        href="#join"
-                        className="text-violet-glow underline"
-                        onClick={() => setDialogOpen(false)}
-                      >
-                        the join section
-                      </a>
-                      .
-                    </p>
-                  </div>
-                )}
-              </div>
+            <DialogDescription className="sr-only">
+              Registration confirmation with your team join code
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-center text-muted-foreground">
+              Registration received. See you at the hackathon!
+            </p>
+            {joinCode && (
+              <div className="rounded-lg border border-cyan-glow/30 bg-c29-bg p-5 text-center">
+                <p className="mb-2 text-xs uppercase tracking-widest text-cyan-glow">
+                  Your Join Code
+                </p>
+                <p className="font-mono text-3xl font-bold tracking-[0.3em] text-cyan-glow text-glow-cyan">
+                  {joinCode}
+                </p>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Share this code with your teammates so they can join at{" "}
+                  <a
+                    href="#join"
+                    className="text-violet-glow underline"
+                    onClick={() => setDialogOpen(false)}
+                  >
+                    the join section
+                  </a>
+                  .
+                </p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </section>

@@ -1,19 +1,21 @@
-import { createTables } from "@/lib/db/schema";
+import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 
 /**
  * GET /api/setup
- * Run once to create the database tables. Safe to call multiple times
- * (uses IF NOT EXISTS). Delete this route after initial setup.
+ * Health-check route that verifies the database connection.
+ * Schema is now managed by Prisma Migrate — run `npx prisma migrate dev`
+ * to create/update tables.
  */
 export async function GET() {
   try {
-    await createTables();
-    return NextResponse.json({ message: "Tables created successfully." });
+    // Simple connectivity check
+    await prisma.$queryRaw`SELECT 1`;
+    return NextResponse.json({ message: "Database connection OK. Tables are managed by Prisma Migrate." });
   } catch (error) {
     console.error("Setup error:", error);
     return NextResponse.json(
-      { error: "Failed to create tables", details: String(error) },
+      { error: "Failed to connect to database", details: String(error) },
       { status: 500 },
     );
   }
