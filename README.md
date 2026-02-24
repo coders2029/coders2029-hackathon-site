@@ -1,24 +1,55 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Requirements
+
+- **Node.js** ≥ 18
+- **PostgreSQL** (local via [Postgres.app](https://postgresapp.com) or remote via Neon)
+
+## Dependencies
+
+| Package | Purpose |
+|---|---|
+| `next` / `react` / `react-dom` | Framework & UI |
+| `three` / `@react-three/fiber` / `@react-three/drei` | 3D hero scene |
+| `react-hook-form` / `@hookform/resolvers` / `zod` | Form validation |
+| `pg` | PostgreSQL client (local & Neon) |
+| `radix-ui` / `shadcn` / `lucide-react` | UI component primitives & icons |
+| `class-variance-authority` / `clsx` / `tailwind-merge` | Styling utilities |
+| `sonner` | Toast notifications |
+| `next-themes` | Dark mode support |
+| `tw-animate-css` | Tailwind animations |
+
+### Dev Dependencies
+
+`@biomejs/biome` · `@tailwindcss/postcss` · `tailwindcss` · `typescript` · `@types/*`
+
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. Set up your environment:
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your POSTGRES_URL
+   ```
+
+3. Start Postgres and create the database:
+   ```bash
+   createdb coders2029
+   ```
+
+4. Run the dev server:
+   ```bash
+   npm run dev
+   ```
+
+5. Create DB tables (one-time):
+   Visit [http://localhost:3000/api/setup](http://localhost:3000/api/setup)
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
 
