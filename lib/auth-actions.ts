@@ -25,6 +25,14 @@ const signupSchema = z
     rollNumber: z
       .string()
       .regex(/^2025\d{6}$/, "Roll number must be 10 digits and start with 2025"),
+    githubUrl: z
+      .string()
+      .url("Enter a valid URL")
+      .refine(
+        (u) => /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+\/?$/.test(u),
+        "Must be a valid GitHub profile URL (github.com/<username>)"
+      ),
+    branch: z.enum(["CE", "CSE", "EXTC"]),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
   })
@@ -54,7 +62,7 @@ export async function signup(
     return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const { name, email, password, rollNumber } = parsed.data;
+  const { name, email, password, rollNumber, githubUrl, branch } = parsed.data;
 
   // Check for existing user by email or roll number
   const existingEmail = await prisma.user.findUnique({ where: { email } });
@@ -70,7 +78,14 @@ export async function signup(
   const hashed = await hashPassword(password);
 
   const user = await prisma.user.create({
-    data: { name, email, password: hashed, rollNumber },
+    data: {
+      name,
+      email,
+      password: hashed,
+      rollNumber,
+      githubUrl,
+      branch,
+    },
   });
 
   await createSession({ userId: user.id, name: user.name, email: user.email });

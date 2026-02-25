@@ -50,6 +50,8 @@ model User {
   name       String
   email      String   @unique
   rollNumber String   @unique @map("roll_number")
+  githubUrl  String   @map("github_url")
+  branch     Branch
   password   String
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 

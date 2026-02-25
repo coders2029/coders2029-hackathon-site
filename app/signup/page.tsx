@@ -7,10 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [branch, setBranch] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,6 +30,8 @@ export default function SignupPage() {
       name: form.get("name") as string,
       email: form.get("email") as string,
       rollNumber: form.get("rollNumber") as string,
+      githubUrl: form.get("githubUrl") as string,
+      branch: branch as any,
       password: form.get("password") as string,
       confirmPassword: form.get("confirmPassword") as string,
     });
@@ -95,6 +105,32 @@ export default function SignupPage() {
                 title="Roll number must be 10 digits and start with 2025"
                 className="bg-c29-bg/50 border-border/30 focus:border-cyan-glow/50"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="githubUrl">GitHub Profile URL</Label>
+              <Input
+                id="githubUrl"
+                name="githubUrl"
+                type="url"
+                placeholder="https://github.com/username"
+                required
+                className="bg-c29-bg/50 border-border/30 focus:border-cyan-glow/50"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Branch</Label>
+              <Select onValueChange={setBranch} required>
+                <SelectTrigger className="bg-c29-bg/50 border-border/30 focus:border-cyan-glow/50">
+                  <SelectValue placeholder="Select your branch" />
+                </SelectTrigger>
+                <SelectContent className="bg-c29-surface border-border/30">
+                  <SelectItem value="CE">Computer Engineering</SelectItem>
+                  <SelectItem value="CSE">Computer Science & Engineering</SelectItem>
+                  <SelectItem value="EXTC">Electronics & Telecomm</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
