@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MouseGlow } from "@/components/ui/mouse-glow";
+
+const AboutCanvas = dynamic(
+  () => import("@/components/three/SectionCanvases").then((m) => m.AboutCanvas),
+  { ssr: false },
+);
 
 /* ─── CountUp animation ─── */
 function CountUp({
@@ -38,10 +45,7 @@ function CountUp({
   }, [end, duration]);
 
   return (
-    <span
-      ref={ref}
-      className="font-mono text-4xl font-bold text-cyan-glow text-glow-cyan"
-    >
+    <span ref={ref} className="font-mono text-4xl font-bold text-foreground">
       {count}
       {suffix}
     </span>
@@ -51,17 +55,17 @@ function CountUp({
 /* ─── Glitch text effect ─── */
 function GlitchText({ children }: { children: string }) {
   return (
-    <span className="relative inline-block font-mono font-bold text-cyan-glow group">
+    <span className="relative inline-block font-mono font-bold text-foreground group">
       <span className="relative z-10">{children}</span>
       <span
         aria-hidden
-        className="absolute top-0 left-0.5 z-0 text-pink-glow opacity-0 group-hover:opacity-70 transition-opacity duration-150"
+        className="absolute top-0 left-0.5 z-0 text-muted-foreground/50 opacity-0 group-hover:opacity-70 transition-opacity duration-150"
       >
         {children}
       </span>
       <span
         aria-hidden
-        className="absolute top-0 -left-0.5 z-0 text-violet-glow opacity-0 group-hover:opacity-70 transition-opacity duration-150"
+        className="absolute top-0 -left-0.5 z-0 text-muted-foreground/30 opacity-0 group-hover:opacity-70 transition-opacity duration-150"
       >
         {children}
       </span>
@@ -76,7 +80,12 @@ const stats = [
     suffix: "+",
     extra: "First Year Engineers at SPIT",
   },
-  { label: "Hackathon Duration", value: 12, suffix: "h", extra: "One intense sprint" },
+  {
+    label: "Hackathon Duration",
+    value: 12,
+    suffix: "h",
+    extra: "One intense sprint",
+  },
   {
     label: "Team Size",
     value: 3,
@@ -89,12 +98,15 @@ export default function AboutSection({ className }: { className?: string }) {
   return (
     <section
       id="about"
-      className={`relative py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
+      className={`relative overflow-hidden py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
     >
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:gap-20 items-center">
+      {/* Three.js floating shapes behind content */}
+      <AboutCanvas className="absolute inset-0 z-0 opacity-60" />
+      <MouseGlow color="cyan" />
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-12 lg:grid-cols-2 lg:gap-20 items-center">
         {/* Left: Description */}
         <div>
-          <p className="mb-2 font-mono text-sm uppercase tracking-widest text-cyan-glow">
+          <p className="mb-2 font-mono text-sm uppercase tracking-widest text-muted-foreground">
             // about_us
           </p>
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
@@ -103,15 +115,14 @@ export default function AboutSection({ className }: { className?: string }) {
           <p className="mt-4 text-muted-foreground leading-relaxed max-w-lg">
             We&apos;re a community of{" "}
             <strong className="text-foreground">First Year Engineering</strong>{" "}
-            students at{" "}
-            <strong className="text-foreground">S.P.I.T.</strong> — not
-            officially affiliated with the college, just a group of FY coders
-            who want to learn, build, and grow together. Think of us as your
-            coding crew for the next four years.
+            students at <strong className="text-foreground">S.P.I.T.</strong> —
+            not officially affiliated with the college, just a group of FY
+            coders who want to learn, build, and grow together. Think of us as
+            your coding crew for the next four years.
           </p>
           <p className="mt-3 text-muted-foreground leading-relaxed max-w-lg">
             To kick things off we&apos;re hosting a one-time{" "}
-            <strong className="text-violet-glow">
+            <strong className="text-foreground">
               12-Hour Frontend Hackathon
             </strong>{" "}
             — design it, code it, deploy it, all in one intense sprint. Teams of
@@ -124,7 +135,7 @@ export default function AboutSection({ className }: { className?: string }) {
           {stats.map((s) => (
             <Card
               key={s.label}
-              className="border-border/50 bg-c29-surface/60 backdrop-blur box-glow-cyan hover:border-cyan-glow/30 transition-colors"
+              className="group border-border/50 bg-c29-surface/60 backdrop-blur hover:border-foreground/20 hover:scale-[1.03] transition-all duration-300"
             >
               <CardHeader className="pb-1">
                 <CardTitle className="text-sm font-mono uppercase tracking-wider text-muted-foreground">

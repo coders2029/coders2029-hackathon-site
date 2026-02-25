@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState, useTransition } from "react";
 import { joinTeam } from "@/lib/actions";
+import { MouseGlow } from "@/components/ui/mouse-glow";
 
 /* ─── Schema ─── */
 const joinSchema = z.object({
@@ -92,14 +93,15 @@ export default function JoinTeamSection({ className }: { className?: string }) {
   return (
     <section
       id="join"
-      className={`relative py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
+      className={`relative overflow-hidden py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
     >
-      <div className="mx-auto max-w-2xl">
-        <p className="mb-2 font-mono text-sm uppercase tracking-widest text-violet-glow">
+      <MouseGlow color="violet" />
+      <div className="relative z-10 mx-auto max-w-2xl">
+        <p className="mb-2 font-mono text-sm uppercase tracking-widest text-muted-foreground">
           // join_team
         </p>
         <h2 className="text-3xl font-bold sm:text-4xl">
-          Join Your <span className="text-cyan-glow text-glow-cyan">Team</span>
+          Join Your <span className="text-foreground">Team</span>
         </h2>
         <p className="mt-2 text-muted-foreground">
           Got a 6-character join code from your team lead? Enter it here to hop
@@ -142,7 +144,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ada Lovelace" {...field} />
+                    <Input placeholder="Manan Bhanushali" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,7 +159,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
                 <FormItem>
                   <FormLabel>SPIT Roll Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="2029XXX" {...field} />
+                    <Input placeholder="2025XXX" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -209,7 +211,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
               type="submit"
               size="lg"
               disabled={isPending}
-              className="w-full rounded-full bg-violet-glow text-white font-bold hover:bg-violet-glow/80 box-glow-violet disabled:opacity-50"
+              className="w-full rounded-full bg-foreground text-background font-bold hover:bg-foreground/80 disabled:opacity-50"
             >
               {isPending ? "Joining…" : "Join Team"}
             </Button>
@@ -219,9 +221,9 @@ export default function JoinTeamSection({ className }: { className?: string }) {
 
       {/* Success Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-violet-glow/20 bg-c29-surface sm:max-w-md">
+        <DialogContent className="border-border/30 bg-c29-surface sm:max-w-md">
           <DialogHeader className="space-y-4">
-            <DialogTitle className="text-violet-glow text-glow-violet text-xl text-center">
+            <DialogTitle className="text-foreground text-xl text-center">
               Welcome Aboard! 🚀
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -238,10 +240,10 @@ export default function JoinTeamSection({ className }: { className?: string }) {
               )}
               !
             </p>
-            <div className="rounded-lg border border-violet-glow/30 bg-c29-bg p-4">
+            <div className="rounded-lg border border-border/30 bg-c29-bg p-4">
               <p className="text-sm text-muted-foreground">
                 Team now has{" "}
-                <span className="font-mono text-lg font-bold text-cyan-glow">
+                <span className="font-mono text-lg font-bold text-foreground">
                   {teamInfo?.memberCount}/3
                 </span>{" "}
                 members

@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { MouseGlow } from "@/components/ui/mouse-glow";
 
 /* ─── Timeline phases ─── */
 const phases = [
@@ -88,14 +89,16 @@ export default function HackathonSection({
   return (
     <section
       id="hackathon"
-      className={`relative py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
+      className={`relative overflow-hidden py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
     >
-      <div className="mx-auto max-w-5xl">
-        <p className="mb-2 font-mono text-sm uppercase tracking-widest text-violet-glow">
+      {/* Mouse glow effect */}
+      <MouseGlow color="violet" />
+      <div className="relative z-10 mx-auto max-w-5xl">
+        <p className="mb-2 font-mono text-sm uppercase tracking-widest text-muted-foreground">
           // our_first_event
         </p>
         <h2 className="text-3xl font-bold sm:text-4xl">
-          The <span className="text-cyan-glow text-glow-cyan">Hackathon</span>
+          The <span className="text-foreground">Hackathon</span>
         </h2>
         <p className="mt-2 text-muted-foreground max-w-2xl">
           A one-time, 12-hour frontend-only hackathon for SPIT FY students.
@@ -109,7 +112,7 @@ export default function HackathonSection({
               <TabsTrigger
                 key={p.id}
                 value={p.id}
-                className="font-mono text-xs data-[state=active]:bg-cyan-glow/10 data-[state=active]:text-cyan-glow rounded-lg px-3 py-2"
+                className="font-mono text-xs data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground rounded-lg px-3 py-2 transition-all duration-300"
               >
                 <span className="mr-1.5 text-[10px] text-muted-foreground">
                   {p.icon}
@@ -122,7 +125,7 @@ export default function HackathonSection({
           {phases.map((p) => (
             <TabsContent key={p.id} value={p.id} className="mt-6">
               <div className="rounded-xl border border-border/50 bg-c29-surface/40 p-6 backdrop-blur">
-                <p className="font-mono text-xs text-cyan-glow mb-1">
+                <p className="font-mono text-xs text-muted-foreground mb-1">
                   {p.date}
                 </p>
                 <h3 className="text-xl font-semibold">{p.label}</h3>
@@ -137,8 +140,7 @@ export default function HackathonSection({
         {/* ── Rules Accordion ── */}
         <div className="mt-16">
           <h3 className="text-2xl font-bold">
-            Rules &amp;{" "}
-            <span className="text-violet-glow text-glow-violet">FAQ</span>
+            Rules &amp; <span className="text-foreground">FAQ</span>
           </h3>
           <Accordion type="single" collapsible className="mt-6">
             {rules.map((r, i) => (
@@ -147,7 +149,7 @@ export default function HackathonSection({
                 value={`rule-${i}`}
                 className="border-border/50"
               >
-                <AccordionTrigger className="text-left font-medium hover:text-cyan-glow transition-colors">
+                <AccordionTrigger className="text-left font-medium hover:text-foreground transition-colors">
                   {r.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground leading-relaxed">
@@ -160,13 +162,11 @@ export default function HackathonSection({
 
         {/* ── Prize Teaser ── */}
         <div className="mt-16 flex justify-center">
-          <div className="relative rounded-2xl border border-cyan-glow/20 bg-c29-surface/60 p-8 backdrop-blur text-center max-w-md box-glow-cyan hover:box-glow-violet transition-shadow duration-500">
+          <div className="relative rounded-2xl border border-border/30 bg-c29-surface/60 p-8 backdrop-blur text-center max-w-md hover:border-border/50 transition-shadow duration-500">
             <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-2">
               Prizes
             </p>
-            <h3 className="text-3xl font-bold text-cyan-glow text-glow-cyan">
-              Coming Soon
-            </h3>
+            <h3 className="text-3xl font-bold text-foreground">Coming Soon</h3>
             <p className="mt-2 text-muted-foreground text-sm">
               Cash prizes, swag, and bragging rights. Stay tuned for the full
               prize reveal.

@@ -50,28 +50,28 @@ export default function HeroSection({ className }: { className?: string }) {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-6 px-6 text-center">
         <AnimatedText delay={200}>
-          <h1 className="font-mono text-6xl font-bold tracking-tight text-cyan-glow text-glow-cyan sm:text-7xl lg:text-8xl">
+          <h1 className="font-mono text-6xl font-bold tracking-tight text-foreground sm:text-7xl lg:text-8xl">
             Coders2029
           </h1>
         </AnimatedText>
 
         <AnimatedText delay={600}>
-          <p className="font-mono text-xl tracking-widest text-violet-glow text-glow-violet sm:text-2xl">
+          <p className="font-mono text-xl tracking-widest text-muted-foreground sm:text-2xl">
             SPIT&apos;s FY Coding Community
           </p>
         </AnimatedText>
 
         <AnimatedText delay={1000}>
           <p className="max-w-lg text-base text-muted-foreground sm:text-lg">
-            Learn together. Build together. Our first event — a 12-hour
-            Frontend Hackathon exclusively for First Year Engineering.
+            Learn together. Build together. Our first event — a 12-hour Frontend
+            Hackathon exclusively for First Year Engineering.
           </p>
         </AnimatedText>
 
         <AnimatedText delay={1300}>
           <Button
             size="lg"
-            className="mt-4 rounded-full bg-cyan-glow px-8 py-3 text-lg font-bold text-c29-bg hover:bg-cyan-glow/80 box-glow-cyan transition-shadow"
+            className="mt-4 rounded-full bg-foreground px-8 py-3 text-lg font-bold text-background hover:bg-foreground/80 transition-shadow"
             onClick={() =>
               document
                 .getElementById("signup")

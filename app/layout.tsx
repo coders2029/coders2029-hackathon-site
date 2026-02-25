@@ -27,7 +27,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body className={`${spaceMono.variable} ${dmSans.variable} antialiased`}>
+      <body
+        className={`${spaceMono.variable} ${dmSans.variable} antialiased scanlines relative`}
+      >
         {children}
       </body>
     </html>

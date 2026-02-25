@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState, useTransition } from "react";
 import { registerTeam } from "@/lib/actions";
+import { MouseGlow } from "@/components/ui/mouse-glow";
 
 /* ─── Schema ─── */
 const signupSchema = z.object({
@@ -101,14 +102,15 @@ export default function SignupSection({ className }: { className?: string }) {
   return (
     <section
       id="signup"
-      className={`relative py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
+      className={`relative overflow-hidden py-24 px-6 md:px-12 lg:px-24 ${className ?? ""}`}
     >
-      <div className="mx-auto max-w-2xl">
-        <p className="mb-2 font-mono text-sm uppercase tracking-widest text-cyan-glow">
+      <MouseGlow color="cyan" />
+      <div className="relative z-10 mx-auto max-w-2xl">
+        <p className="mb-2 font-mono text-sm uppercase tracking-widest text-muted-foreground">
           // register
         </p>
         <h2 className="text-3xl font-bold sm:text-4xl">
-          Sign <span className="text-violet-glow text-glow-violet">Up</span>
+          Sign <span className="text-foreground">Up</span>
         </h2>
         <p className="mt-2 text-muted-foreground">
           Grab your spot for the 12-Hour Frontend Hackathon — FY students only.
@@ -283,7 +285,7 @@ export default function SignupSection({ className }: { className?: string }) {
               type="submit"
               size="lg"
               disabled={isPending}
-              className="w-full rounded-full bg-cyan-glow text-c29-bg font-bold hover:bg-cyan-glow/80 box-glow-cyan disabled:opacity-50"
+              className="w-full rounded-full bg-foreground text-background font-bold hover:bg-foreground/80 disabled:opacity-50"
             >
               {isPending ? "Registering..." : "Submit Registration"}
             </Button>
@@ -293,9 +295,9 @@ export default function SignupSection({ className }: { className?: string }) {
 
       {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="border-cyan-glow/20 bg-c29-surface sm:max-w-md">
+        <DialogContent className="border-border/30 bg-c29-surface sm:max-w-md">
           <DialogHeader className="space-y-4">
-            <DialogTitle className="text-cyan-glow text-glow-cyan text-xl text-center">
+            <DialogTitle className="text-foreground text-xl text-center">
               You&apos;re In! 🎉
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -307,18 +309,18 @@ export default function SignupSection({ className }: { className?: string }) {
               Registration received. See you at the hackathon!
             </p>
             {joinCode && (
-              <div className="rounded-lg border border-cyan-glow/30 bg-c29-bg p-5 text-center">
-                <p className="mb-2 text-xs uppercase tracking-widest text-cyan-glow">
+              <div className="rounded-lg border border-border/30 bg-c29-bg p-5 text-center">
+                <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
                   Your Join Code
                 </p>
-                <p className="font-mono text-3xl font-bold tracking-[0.3em] text-cyan-glow text-glow-cyan">
+                <p className="font-mono text-3xl font-bold tracking-[0.3em] text-foreground">
                   {joinCode}
                 </p>
                 <p className="mt-3 text-xs text-muted-foreground">
                   Share this code with your teammates so they can join at{" "}
                   <a
                     href="#join"
-                    className="text-violet-glow underline"
+                    className="text-foreground underline"
                     onClick={() => setDialogOpen(false)}
                   >
                     the join section

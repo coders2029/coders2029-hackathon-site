@@ -50,15 +50,15 @@ function WireTorusKnot() {
 }
 
 /* ─── Floating Particles ─── */
-function ParticleField({ count = 300 }) {
+function ParticleField({ count = 400 }) {
   const points = useRef<THREE.Points>(null!);
 
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 20;
-      arr[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      arr[i * 3] = (Math.random() - 0.5) * 24;
+      arr[i * 3 + 1] = (Math.random() - 0.5) * 24;
+      arr[i * 3 + 2] = (Math.random() - 0.5) * 24;
     }
     return arr;
   }, [count]);
@@ -89,6 +89,22 @@ function ParticleField({ count = 300 }) {
   );
 }
 
+/* ─── Orbiting Ring ─── */
+function HeroRing() {
+  const ref = useRef<THREE.Mesh>(null!);
+  useFrame((state) => {
+    ref.current.rotation.x =
+      Math.PI * 0.5 + Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
+    ref.current.rotation.z = state.clock.elapsedTime * 0.15;
+  });
+  return (
+    <mesh ref={ref} position={[0, 0, -4]}>
+      <torusGeometry args={[3.2, 0.012, 16, 120]} />
+      <meshBasicMaterial color="#a855f7" transparent opacity={0.2} />
+    </mesh>
+  );
+}
+
 /* ─── Subtle Grid Plane ─── */
 function GridFloor() {
   return (
@@ -116,6 +132,7 @@ export default function HeroCanvas({ className }: { className?: string }) {
 
         <WireIcosahedron />
         <WireTorusKnot />
+        <HeroRing />
         <ParticleField />
         <GridFloor />
         <Stars
