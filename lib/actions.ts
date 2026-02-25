@@ -1,14 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/db/prisma";
-import type { Branch, Participation } from "@prisma/client";
+import { getSession } from "@/lib/auth";
 import { z } from "zod";
 
 /* ─── Helpers ─── */
 
-/** Generate a short, readable join code (6 uppercase alphanumeric chars). */
 function generateJoinCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I to avoid confusion
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   for (let i = 0; i < 6; i++) {
     code += chars[Math.floor(Math.random() * chars.length)];
@@ -16,72 +15,102 @@ function generateJoinCode(): string {
   return code;
 }
 
-/* ─── Schemas ─── */
+/* ─── Result types ─── */
 
-const memberSchema = z.object({
-  fullName: z.string().min(2, "Name must be at least 2 characters"),
-  rollNumber: z
-    .string()
-    .regex(/^2025\d{6}$/, "Roll number must be 10 digits and start with 2025"),
-  email: z.string().email("Enter a valid email").refine(
-    (e) => /^[a-z]+\.[a-z]+25@spit\.ac\.in$/.test(e.toLowerCase()),
-    "Email must be in the format name.lastname25@spit.ac.in"
-  ),
-  github: z
-    .string()
-    .url("Enter a valid URL")
-    .refine(
-      (u) => /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+\/?$/.test(u),
-      "Must be a valid GitHub profile URL (github.com/<username>)"
-    ),
-});
-
-const registerSchema = z.object({
-  participation: z.enum(["solo", "team"]),
-  teamName: z.string().optional(),
-  branch: z.enum(["CE", "CSE", "EXTC"]),
-  member: memberSchema,
-});
-
-const joinSchema = z.object({
-  joinCode: z
-    .string()
-    .length(6, "Join code must be 6 characters")
-    .toUpperCase(),
-  member: memberSchema,
-});
-
-/* ─── Register (lead creates team) ─── */
-
-export type RegisterResult =
-  | { success: true; joinCode: string; teamId: string }
+export type ActionResult<T = void> =
+  | ({ success: true } & (T extends void ? {} : T))
   | { success: false; error: string };
 
-export async function registerTeam(
-  input: z.input<typeof registerSchema>,
-): Promise<RegisterResult> {
-  const parsed = registerSchema.safeParse(input);
+/* ─── Get Team Data ─── */
+
+export type TeamMember = {
+  id: string;
+  name: string;
+  email: string;
+  rollNumber: string;
+  githubUrl: string;
+  branch: string;
+  isLead: boolean;
+};
+
+export type TeamData = {
+  id: string;
+  teamName: string;
+  joinCode: string;
+  members: TeamMember[];
+  isLeader: boolean;
+};
+
+export async function getTeamData(): Promise<TeamData | null> {
+  const session = await getSession();
+  if (!session) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { teamId: true },
+  });
+  if (!user?.teamId) return null;
+
+  const team = await prisma.team.findUnique({
+    where: { id: user.teamId },
+    include: {
+      members: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          rollNumber: true,
+          githubUrl: true,
+          branch: true,
+          isLead: true,
+        },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+  if (!team) return null;
+
+  return {
+    id: team.id,
+    teamName: team.teamName,
+    joinCode: team.joinCode,
+    members: team.members,
+    isLeader: team.members.some(
+      (m) => m.id === session.userId && m.isLead
+    ),
+  };
+}
+
+/* ─── Create Team ─── */
+
+const createTeamSchema = z.object({
+  teamName: z.string().min(2, "Team name must be at least 2 characters"),
+});
+
+export async function createTeam(
+  input: z.input<typeof createTeamSchema>,
+): Promise<ActionResult<{ joinCode: string }>> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "You must be logged in." };
+
+  const parsed = createTeamSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const { participation, teamName, branch, member } = parsed.data;
-  const maxMembers = participation === "solo" ? 1 : 3;
-
-  // Check if roll number or email already registered
-  const existing = await prisma.member.findFirst({
-    where: {
-      OR: [{ rollNumber: member.rollNumber }, { email: member.email }],
-    },
+  // Verify user exists and is not already in a team
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { id: true, teamId: true },
   });
-  if (existing) {
-    return {
-      success: false,
-      error: "This roll number or email is already registered.",
-    };
+  if (!user) {
+    return { success: false, error: "Session expired. Please log out and sign up again." };
+  }
+  if (user.teamId) {
+    return { success: false, error: "You are already in a team." };
   }
 
-  // Generate a unique join code
+  // Generate unique join code
   let joinCode = generateJoinCode();
   let attempts = 0;
   while (attempts < 10) {
@@ -91,91 +120,155 @@ export async function registerTeam(
     attempts++;
   }
 
-  // Create team + lead member in a single transaction
+  // Create team, then assign user as leader
   const team = await prisma.team.create({
     data: {
-      teamName: teamName || null,
+      teamName: parsed.data.teamName,
       joinCode,
-      participation: participation as Participation,
-      branch: branch as Branch,
-      maxMembers,
-      members: {
-        create: {
-          fullName: member.fullName,
-          rollNumber: member.rollNumber,
-          email: member.email,
-          githubUrl: member.github,
-          isLead: true,
-        },
-      },
     },
   });
 
-  return { success: true, joinCode, teamId: team.id };
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: { teamId: team.id, isLead: true },
+  });
+
+  return { success: true, joinCode };
 }
 
-/* ─── Join Team (teammate enters code) ─── */
+/* ─── Join Team ─── */
 
-export type JoinResult =
-  | { success: true; teamName: string | null; memberCount: number }
-  | { success: false; error: string };
+const joinTeamSchema = z.object({
+  joinCode: z
+    .string()
+    .length(6, "Join code must be 6 characters")
+    .toUpperCase(),
+});
 
 export async function joinTeam(
-  input: z.input<typeof joinSchema>,
-): Promise<JoinResult> {
-  const parsed = joinSchema.safeParse(input);
+  input: z.input<typeof joinTeamSchema>,
+): Promise<ActionResult> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "You must be logged in." };
+
+  const parsed = joinTeamSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0].message };
   }
 
-  const { joinCode, member } = parsed.data;
+  // Check if user is already in a team
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { teamId: true },
+  });
+  if (user?.teamId) {
+    return { success: false, error: "You are already in a team. Leave it first." };
+  }
 
-  // Find team with member count
+  // Find team
   const team = await prisma.team.findUnique({
-    where: { joinCode },
+    where: { joinCode: parsed.data.joinCode },
     include: { _count: { select: { members: true } } },
   });
   if (!team) {
-    return { success: false, error: "Invalid join code. Check with your team lead." };
+    return { success: false, error: "Invalid join code." };
   }
 
-  if (team.participation === "solo") {
-    return { success: false, error: "This is a solo registration — no teammates allowed." };
-  }
-
-  const currentCount = team._count.members;
-  if (currentCount >= team.maxMembers) {
+  if (team._count.members >= 3) {
     return { success: false, error: "Team is already full (max 3 members)." };
   }
 
-  // Check if roll number or email already registered
-  const existing = await prisma.member.findFirst({
-    where: {
-      OR: [{ rollNumber: member.rollNumber }, { email: member.email }],
-    },
+  // Add user to team
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: { teamId: team.id, isLead: false },
   });
-  if (existing) {
-    return {
-      success: false,
-      error: "This roll number or email is already registered.",
-    };
+
+  return { success: true };
+}
+
+/* ─── Leave Team ─── */
+
+export async function leaveTeam(): Promise<ActionResult> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "You must be logged in." };
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { teamId: true, isLead: true },
+  });
+  if (!user?.teamId) {
+    return { success: false, error: "You are not in a team." };
   }
 
-  // Insert member
-  await prisma.member.create({
-    data: {
-      teamId: team.id,
-      fullName: member.fullName,
-      rollNumber: member.rollNumber,
-      email: member.email,
-      githubUrl: member.github,
-      isLead: false,
-    },
+  const teamId = user.teamId;
+
+  // Remove user from team
+  await prisma.user.update({
+    where: { id: session.userId },
+    data: { teamId: null, isLead: false },
   });
 
-  return {
-    success: true,
-    teamName: team.teamName,
-    memberCount: currentCount + 1,
-  };
+  // If user was leader, check if team is now empty
+  const remaining = await prisma.team.findUnique({
+    where: { id: teamId },
+    include: { _count: { select: { members: true } } },
+  });
+
+  if (remaining && remaining._count.members === 0) {
+    // Delete empty team
+    await prisma.team.delete({ where: { id: teamId } });
+  } else if (remaining && user.isLead) {
+    // Transfer leadership to the earliest member
+    const nextLead = await prisma.user.findFirst({
+      where: { teamId },
+      orderBy: { createdAt: "asc" },
+    });
+    if (nextLead) {
+      await prisma.user.update({
+        where: { id: nextLead.id },
+        data: { isLead: true },
+      });
+    }
+  }
+
+  return { success: true };
+}
+
+/* ─── Remove Member (leader only) ─── */
+
+export async function removeMember(
+  memberId: string,
+): Promise<ActionResult> {
+  const session = await getSession();
+  if (!session) return { success: false, error: "You must be logged in." };
+
+  // Verify current user is the leader
+  const leader = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { teamId: true, isLead: true },
+  });
+  if (!leader?.teamId || !leader.isLead) {
+    return { success: false, error: "Only the team leader can remove members." };
+  }
+
+  // Verify the target member is on the same team
+  const member = await prisma.user.findUnique({
+    where: { id: memberId },
+    select: { teamId: true, isLead: true },
+  });
+  if (!member || member.teamId !== leader.teamId) {
+    return { success: false, error: "Member not found in your team." };
+  }
+  if (member.isLead) {
+    return { success: false, error: "You cannot remove yourself as leader. Use 'Leave Team' instead." };
+  }
+
+  // Remove member
+  await prisma.user.update({
+    where: { id: memberId },
+    data: { teamId: null, isLead: false },
+  });
+
+  return { success: true };
 }

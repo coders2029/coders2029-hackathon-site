@@ -6,11 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Participation {
-  solo
-  team
-}
-
 enum Branch {
   CE
   CSE
@@ -18,31 +13,14 @@ enum Branch {
 }
 
 model Team {
-  id            String        @id @default(uuid()) @db.Uuid
-  teamName      String?       @map("team_name")
-  joinCode      String        @unique @map("join_code")
-  participation Participation
-  branch        Branch
-  maxMembers    Int           @default(1) @map("max_members")
-  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  members       Member[]
+  id        String   @id @default(uuid()) @db.Uuid
+  teamName  String   @map("team_name")
+  joinCode  String   @unique @map("join_code")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  members   User[]
 
   @@index([joinCode])
   @@map("teams")
-}
-
-model Member {
-  id         String   @id @default(uuid()) @db.Uuid
-  teamId     String   @map("team_id") @db.Uuid
-  fullName   String   @map("full_name")
-  rollNumber String   @unique @map("roll_number")
-  email      String   @unique
-  githubUrl  String   @map("github_url")
-  isLead     Boolean  @default(false) @map("is_lead")
-  joinedAt   DateTime @default(now()) @map("joined_at") @db.Timestamptz
-  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  @@map("members")
 }
 
 model User {
@@ -53,7 +31,10 @@ model User {
   githubUrl  String   @map("github_url")
   branch     Branch
   password   String
+  teamId     String?  @map("team_id") @db.Uuid
+  isLead     Boolean  @default(false) @map("is_lead")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  team       Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
 
   @@map("users")
 }

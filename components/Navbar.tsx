@@ -8,9 +8,7 @@ import Link from "next/link";
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "Hackathon", href: "#hackathon" },
-  { label: "Register", href: "#signup" },
-  { label: "Join Team", href: "#join" },
-  { label: "My Team", href: "#myteam" },
+  { label: "Team", href: "/team" },
 ];
 
 type SessionUser = { name: string; email: string } | null;
