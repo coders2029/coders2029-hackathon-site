@@ -22,13 +22,18 @@ const memberSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   rollNumber: z
     .string()
-    .min(3, "Enter a valid SPIT roll number")
-    .max(20, "Roll number too long"),
-  email: z.string().email("Enter a valid email"),
+    .regex(/^2025\d{6}$/, "Roll number must be 10 digits and start with 2025"),
+  email: z.string().email("Enter a valid email").refine(
+    (e) => /^[a-z]+\.[a-z]+25@spit\.ac\.in$/.test(e.toLowerCase()),
+    "Email must be in the format name.lastname25@spit.ac.in"
+  ),
   github: z
     .string()
     .url("Enter a valid URL")
-    .refine((u) => u.includes("github.com"), "Must be a GitHub URL"),
+    .refine(
+      (u) => /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+\/?$/.test(u),
+      "Must be a valid GitHub profile URL (github.com/<username>)"
+    ),
 });
 
 const registerSchema = z.object({

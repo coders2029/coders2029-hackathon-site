@@ -33,13 +33,18 @@ const joinSchema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters"),
   rollNumber: z
     .string()
-    .min(3, "Enter a valid SPIT roll number")
-    .max(20, "Roll number too long"),
-  email: z.string().email("Enter a valid email"),
+    .regex(/^2025\d{6}$/, "Roll number must be 10 digits and start with 2025"),
+  email: z.string().email("Enter a valid email").refine(
+    (e) => /^[a-z]+\.[a-z]+25@spit\.ac\.in$/.test(e.toLowerCase()),
+    "Email must be in the format name.lastname25@spit.ac.in"
+  ),
   github: z
     .string()
     .url("Enter a valid URL")
-    .refine((u) => u.includes("github.com"), "Must be a GitHub URL"),
+    .refine(
+      (u) => /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+\/?$/.test(u),
+      "Must be a valid GitHub profile URL (github.com/<username>)"
+    ),
 });
 
 type JoinValues = z.infer<typeof joinSchema>;
@@ -159,7 +164,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
                 <FormItem>
                   <FormLabel>SPIT Roll Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="2025XXX" {...field} />
+                    <Input placeholder="2025XXXXXX" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -176,7 +181,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="you@spit.ac.in"
+                      placeholder="name.lastname25@spit.ac.in"
                       {...field}
                     />
                   </FormControl>
@@ -194,7 +199,7 @@ export default function JoinTeamSection({ className }: { className?: string }) {
                   <FormLabel>GitHub Profile URL</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="https://github.com/yourname"
+                      placeholder="https://github.com/username"
                       {...field}
                     />
                   </FormControl>
