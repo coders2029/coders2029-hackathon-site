@@ -2,17 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { logout } from "@/lib/auth-actions";
+import Link from "next/link";
 
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "Hackathon", href: "#hackathon" },
   { label: "Register", href: "#signup" },
   { label: "Join Team", href: "#join" },
+  { label: "My Team", href: "#myteam" },
 ];
+
+type SessionUser = { name: string; email: string } | null;
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
+  const [user, setUser] = useState<SessionUser>(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -36,6 +43,17 @@ export default function Navbar() {
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
+  }, []);
+
+  /* Fetch session on mount */
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((data) => {
+        setUser(data.user ?? null);
+        setAuthLoaded(true);
+      })
+      .catch(() => setAuthLoaded(true));
   }, []);
 
   return (
@@ -72,18 +90,46 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* CTA */}
-        <Button
-          size="sm"
-          className="rounded-full bg-foreground text-background font-bold hover:bg-foreground/80 text-xs"
-          onClick={() =>
-            document
-              .getElementById("signup")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
-        >
-          Register
-        </Button>
+        {/* Auth buttons */}
+        <div className="flex items-center gap-2">
+          {authLoaded && user ? (
+            <>
+              <span className="hidden sm:inline text-xs font-mono text-muted-foreground truncate max-w-[120px]">
+                {user.name}
+              </span>
+              <form action={logout}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  type="submit"
+                  className="rounded-full text-xs border-border/30 hover:bg-muted/50"
+                >
+                  Logout
+                </Button>
+              </form>
+            </>
+          ) : authLoaded ? (
+            <>
+              <Link href="/login">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="rounded-full text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Log in
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-foreground text-background font-bold hover:bg-foreground/80 text-xs"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          ) : null}
+        </div>
       </nav>
     </header>
   );
