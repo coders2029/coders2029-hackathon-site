@@ -38,3 +38,10 @@ model User {
 
   @@map("users")
 }
+
+model SiteSettings {
+  id                  String  @id @default("singleton")
+  registrationOpen    Boolean @default(true) @map("registration_open")
+
+  @@map("site_settings")
+}

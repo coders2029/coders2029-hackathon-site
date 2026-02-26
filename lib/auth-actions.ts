@@ -57,6 +57,14 @@ export type AuthResult =
 export async function signup(
   input: z.input<typeof signupSchema>,
 ): Promise<AuthResult> {
+  // Check if registration is open
+  const settings = await prisma.siteSettings.findUnique({
+    where: { id: "singleton" },
+  });
+  if (settings && !settings.registrationOpen) {
+    return { success: false, error: "Registration is currently closed." };
+  }
+
   const parsed = signupSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0].message };
