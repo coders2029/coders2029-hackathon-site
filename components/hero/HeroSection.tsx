@@ -63,7 +63,7 @@ export default function HeroSection({ className }: { className?: string }) {
 
         <AnimatedText delay={1000}>
           <p className="max-w-lg text-base text-muted-foreground sm:text-lg">
-            Learn together. Build together. Our first event — a 12-hour Frontend
+            Learn together. Build together. Our first event — a 12-hour
             Hackathon exclusively for First Year Engineering.
           </p>
         </AnimatedText>
@@ -72,13 +72,11 @@ export default function HeroSection({ className }: { className?: string }) {
           <Button
             size="lg"
             className="mt-4 rounded-full bg-foreground px-8 py-3 text-lg font-bold text-background hover:bg-foreground/80 transition-shadow"
-            onClick={() =>
-              document
-                .getElementById("signup")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => {
+              window.location.href = "/team";
+            }}
           >
-            Register Now
+            Go to Team Page
           </Button>
         </AnimatedText>
 

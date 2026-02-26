@@ -14,6 +14,23 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { MouseGlow } from "@/components/ui/mouse-glow";
+import dynamic from "next/dynamic";
+
+const AboutCanvas = dynamic(
+  () => import("@/components/three/SectionCanvases").then((m) => m.AboutCanvas),
+  { ssr: false },
+);
+import {
   createTeam,
   joinTeam,
   leaveTeam,
@@ -61,11 +78,14 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="min-h-screen bg-c29-bg px-4 py-24">
+    <div className="min-h-screen bg-c29-bg px-4 py-24 relative overflow-hidden">
+      <AboutCanvas className="absolute inset-0 z-0 opacity-40 pointer-events-none" />
+      <MouseGlow color="cyan" />
+
       {/* Ambient glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-cyan-glow/5 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-violet-glow/5 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-10 left-10 h-96 w-96 rounded-full bg-cyan-glow/5 blur-3xl" />
+        <div className="absolute bottom-10 right-10 h-96 w-96 rounded-full bg-violet-glow/5 blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-2xl">
@@ -251,15 +271,13 @@ function TeamDetails({
   const [isPending, startTransition] = useTransition();
 
   function handleLeave() {
-    if (!confirm("Are you sure you want to leave this team?")) return;
     startTransition(async () => {
       await leaveTeam();
       await onRefresh();
     });
   }
 
-  function handleRemove(memberId: string, memberName: string) {
-    if (!confirm(`Remove ${memberName} from the team?`)) return;
+  function handleRemove(memberId: string) {
     startTransition(async () => {
       await removeMember(memberId);
       await onRefresh();
@@ -329,15 +347,39 @@ function TeamDetails({
                 </div>
                 {/* Remove button: leader can remove others */}
                 {team.isLeader && !member.isLead && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={isPending}
-                    onClick={() => handleRemove(member.id, member.name)}
-                    className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    Remove
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={isPending}
+                        className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        Remove
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Remove Member</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to remove {member.name} from the team?
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                          <Button 
+                            variant="destructive" 
+                            onClick={() => handleRemove(member.id)}
+                          >
+                            Remove
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </CardContent>
@@ -346,14 +388,33 @@ function TeamDetails({
       </div>
 
       {/* Leave Team */}
-      <Button
-        variant="outline"
-        disabled={isPending}
-        onClick={handleLeave}
-        className="rounded-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-      >
-        {isPending ? "Leaving…" : "Leave Team"}
-      </Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button
+            variant="outline"
+            disabled={isPending}
+            className="rounded-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          >
+            {isPending ? "Leaving…" : "Leave Team"}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Leave Team</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to leave this team? If you're the last member, the team will be disbanded.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <DialogClose asChild>
+              <Button variant="destructive" onClick={handleLeave}>Leave</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

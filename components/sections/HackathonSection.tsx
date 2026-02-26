@@ -32,7 +32,7 @@ const phases = [
     label: "Build Phase",
     icon: "03",
     description:
-      "12 hours of pure frontend hacking. Build with React, Vue, Svelte, or Vanilla JS — your call. Deploy to Vercel, Netlify, or any static host.",
+      "12 hours of pure hacking. Build with whatever tools you prefer — React, Vue, Svelte, Vanilla JS, Python, Node, etc. Deploy to any host.",
     date: "12 hours",
   },
   {
@@ -60,8 +60,8 @@ const rules = [
     a: "Any current SPIT First Year Engineering (FE) student. All branches welcome.",
   },
   {
-    q: "What counts as 'frontend only'?",
-    a: "Your project must be a client-side web application. No custom backend servers. You may use public APIs, Firebase, or Supabase for data, but the judging is 100% on the frontend.",
+    q: "Is it restricted to frontend only?",
+    a: "No! You can build full-stack applications, pure frontend apps, or any software project you want. Public APIs and backend services are welcome.",
   },
   {
     q: "Team size?",
@@ -101,7 +101,7 @@ export default function HackathonSection({
           The <span className="text-foreground">Hackathon</span>
         </h2>
         <p className="mt-2 text-muted-foreground max-w-2xl">
-          A one-time, 12-hour frontend-only hackathon for SPIT FY students.
+          A one-time, 12-hour hackathon for SPIT FY students.
           Teams of up to 3. Build something awesome and deploy it live.
         </p>
 
