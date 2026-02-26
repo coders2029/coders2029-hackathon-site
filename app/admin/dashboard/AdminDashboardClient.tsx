@@ -134,12 +134,6 @@ export default function AdminDashboardClient({
 
   return (
     <div className="min-h-screen bg-c29-bg text-foreground">
-      {/* Ambient glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-cyan-glow/5 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-violet-glow/5 blur-3xl" />
-      </div>
-
       {/* Header */}
       <header className="relative z-10 border-b border-border/20 bg-c29-surface/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -215,7 +209,7 @@ export default function AdminDashboardClient({
                     </span>
                     <div className="flex-1 h-2 rounded-full bg-border/20 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-cyan-glow/60 to-violet-glow/60 transition-all duration-500"
+                        className="h-full rounded-full bg-cyan-glow/80 transition-all duration-500"
                         style={{
                           width: `${stats.totalUsers > 0 ? (b.count / stats.totalUsers) * 100 : 0}%`,
                         }}
@@ -248,7 +242,7 @@ export default function AdminDashboardClient({
                     </span>
                     <div className="flex-1 h-2 rounded-full bg-border/20 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-violet-glow/60 to-pink-glow/60 transition-all duration-500"
+                        className="h-full rounded-full bg-violet-glow/80 transition-all duration-500"
                         style={{
                           width: `${(b.count / maxBucketCount) * 100}%`,
                         }}
@@ -282,17 +276,17 @@ export default function AdminDashboardClient({
                 <button
                   onClick={handleToggleRegistration}
                   disabled={isPending}
-                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none border ${
                     stats.registrationOpen
-                      ? "bg-cyan-glow/40"
-                      : "bg-border/30"
+                      ? "bg-muted-foreground border-muted-foreground"
+                      : "bg-c29-surface border-border/50"
                   }`}
                 >
                   <span
-                    className={`inline-block h-5 w-5 rounded-full bg-foreground transition-transform duration-300 ${
+                    className={`inline-block h-4 w-4 rounded-full transition-transform duration-300 ${
                       stats.registrationOpen
-                        ? "translate-x-6"
-                        : "translate-x-1"
+                        ? "translate-x-6 bg-c29-bg"
+                        : "translate-x-1 bg-muted-foreground"
                     }`}
                   />
                 </button>
@@ -468,9 +462,7 @@ function StatCard({
 }) {
   return (
     <Card
-      className={`border-border/30 bg-c29-surface/60 backdrop-blur ${
-        color === "cyan" ? "box-glow-cyan" : "box-glow-violet"
-      }`}
+      className={`border-border/30 bg-c29-surface/80 transition-colors hover:border-border/60`}
     >
       <CardContent className="pt-6 pb-4 px-5">
         <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
@@ -516,7 +508,7 @@ function TeamCard({
         className="w-full flex items-center justify-between px-5 py-4 text-left"
       >
         <div className="flex items-center gap-4 min-w-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-glow/10 to-violet-glow/10 font-mono text-sm font-bold text-foreground shrink-0">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-glow/10 border border-cyan-glow/20 font-mono text-sm font-bold text-cyan-glow shrink-0">
             {team.members.length}
           </div>
           <div className="min-w-0">

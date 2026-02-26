@@ -40,13 +40,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-c29-bg px-4">
-      {/* Ambient glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-violet-glow/5 blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-cyan-glow/5 blur-3xl" />
-      </div>
-
-      <Card className="relative z-10 w-full max-w-md border-border/30 bg-c29-surface/80 backdrop-blur-xl box-glow-violet">
+      <Card className="relative z-10 w-full max-w-md border-border/30 bg-c29-surface/80">
         <CardHeader className="text-center space-y-1">
           <Link
             href="/"
