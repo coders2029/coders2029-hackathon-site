@@ -6,6 +6,7 @@ FY students can register solo or as a team (up to 3 members), receive a join cod
 
 ---
 
+
 ## Tech Stack
 
 | Layer     | Tech                                                       |
