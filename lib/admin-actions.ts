@@ -118,20 +118,20 @@ export type AdminTeam = {
 export async function getAdminTeams(search?: string): Promise<AdminTeam[]> {
   const where = search
     ? {
-        OR: [
-          { teamName: { contains: search, mode: "insensitive" as const } },
-          {
-            members: {
-              some: {
-                OR: [
-                  { name: { contains: search, mode: "insensitive" as const } },
-                  { email: { contains: search, mode: "insensitive" as const } },
-                ],
-              },
+      OR: [
+        { teamName: { contains: search, mode: "insensitive" as const } },
+        {
+          members: {
+            some: {
+              OR: [
+                { name: { contains: search, mode: "insensitive" as const } },
+                { email: { contains: search, mode: "insensitive" as const } },
+              ],
             },
           },
-        ],
-      }
+        },
+      ],
+    }
     : {};
 
   const teams = await prisma.team.findMany({
@@ -163,6 +163,51 @@ export async function getAdminTeams(search?: string): Promise<AdminTeam[]> {
       ...m,
       createdAt: m.createdAt.toISOString(),
     })),
+  }));
+}
+
+/* ─── Teamless Users ─── */
+
+export type TeamlessUser = {
+  id: string;
+  name: string;
+  email: string;
+  rollNumber: string;
+  githubUrl: string;
+  branch: string;
+  createdAt: string;
+};
+
+export async function getTeamlessUsers(
+  search?: string,
+): Promise<TeamlessUser[]> {
+  const where: Record<string, unknown> = { teamId: null };
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" as const } },
+      { email: { contains: search, mode: "insensitive" as const } },
+      { rollNumber: { contains: search, mode: "insensitive" as const } },
+    ];
+  }
+
+  const users = await prisma.user.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      rollNumber: true,
+      githubUrl: true,
+      branch: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return users.map((u) => ({
+    ...u,
+    createdAt: u.createdAt.toISOString(),
   }));
 }
 

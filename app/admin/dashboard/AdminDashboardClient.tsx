@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   type AdminStats,
   type AdminTeam,
   type ActivityEntry,
+  type TeamlessUser,
   getAdminTeams,
+  getTeamlessUsers,
   deleteTeam,
   toggleRegistration,
   exportTeamsCSV,
@@ -65,15 +67,42 @@ export default function AdminDashboardClient({
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"teams" | "activity">("teams");
+  const [teamlessUsers, setTeamlessUsers] = useState<TeamlessUser[]>([]);
 
-  /* ── Search & filter ── */
-  async function handleSearch(query: string) {
+  /* ── Debounced search ── */
+  const searchCounter = useRef(0);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const executeSearch = useCallback(
+    (query: string) => {
+      const id = ++searchCounter.current;
+      startTransition(async () => {
+        const [teamsResult, usersResult] = await Promise.all([
+          getAdminTeams(query || undefined),
+          query ? getTeamlessUsers(query) : Promise.resolve([]),
+        ]);
+        // Only apply if this is still the latest request
+        if (id === searchCounter.current) {
+          setTeams(teamsResult);
+          setTeamlessUsers(usersResult);
+        }
+      });
+    },
+    [startTransition],
+  );
+
+  function handleSearch(query: string) {
     setSearch(query);
-    startTransition(async () => {
-      const result = await getAdminTeams(query || undefined);
-      setTeams(result);
-    });
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => executeSearch(query), 300);
   }
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, []);
 
   const filteredTeams =
     branchFilter === "all"
@@ -397,6 +426,50 @@ export default function AdminDashboardClient({
                       isPending={isPending}
                     />
                   ))}
+                </div>
+              )}
+
+              {/* ── Teamless Users ── */}
+              {teamlessUsers.length > 0 && (
+                <div className="mt-8 space-y-4">
+                  <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                    // users without a team ({teamlessUsers.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {teamlessUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 rounded-xl border border-border/20 bg-c29-surface/40 backdrop-blur px-5 py-4 transition-colors hover:border-border/40"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="h-2 w-2 rounded-full bg-amber-500/60 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {user.name}
+                              <span className="ml-2 inline-block text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                                No Team
+                              </span>
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono pl-5 sm:pl-0">
+                          <span>{user.rollNumber}</span>
+                          <span className="text-foreground/60">{user.branch}</span>
+                          <a
+                            href={user.githubUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-cyan-glow hover:underline"
+                          >
+                            GitHub ↗
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
