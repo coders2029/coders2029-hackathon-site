@@ -76,7 +76,7 @@ function GlitchText({ children }: { children: string }) {
 const stats = [
   {
     label: "FY Community",
-    value: 100,
+    value: 400,
     suffix: "+",
     extra: "First Year Engineers at SPIT",
   },
@@ -122,10 +122,8 @@ export default function AboutSection({ className }: { className?: string }) {
           </p>
           <p className="mt-3 text-muted-foreground leading-relaxed max-w-lg">
             To kick things off we&apos;re hosting a one-time{" "}
-            <strong className="text-foreground">
-              12-Hour Hackathon
-            </strong>{" "}
-            — design it, code it, deploy it, all in one intense sprint. Teams of
+            <strong className="text-foreground">12-Hour Hackathon</strong> —
+            design it, code it, deploy it, all in one intense sprint. Teams of
             up to 3, open to every FY student.
           </p>
         </div>

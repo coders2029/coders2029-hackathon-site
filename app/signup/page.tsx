@@ -6,7 +6,13 @@ import { signup } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -127,7 +133,9 @@ export default function SignupPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-c29-surface border-border/30">
                   <SelectItem value="CE">Computer Engineering</SelectItem>
-                  <SelectItem value="CSE">Computer Science & Engineering</SelectItem>
+                  <SelectItem value="CSE">
+                    Computer Science & Engineering
+                  </SelectItem>
                   <SelectItem value="EXTC">Electronics & Telecomm</SelectItem>
                 </SelectContent>
               </Select>
@@ -181,6 +189,27 @@ export default function SignupPage() {
             </Link>
           </p>
         </CardContent>
+
+        <div className="mt-4 text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            Back to main site
+          </Link>
+        </div>
       </Card>
     </div>
   );

@@ -16,6 +16,7 @@ type SessionUser = { name: string; email: string } | null;
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<SessionUser>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
 
@@ -88,7 +89,7 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Auth buttons */}
+        {/* Auth + mobile toggle */}
         <div className="flex items-center gap-2">
           {authLoaded && user ? (
             <>
@@ -127,8 +128,64 @@ export default function Navbar() {
               </Link>
             </>
           ) : null}
+
+          {/* Hamburger — visible only on mobile */}
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            className="sm:hidden ml-1 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              className="transition-transform duration-200"
+            >
+              {mobileOpen ? (
+                <>
+                  <line x1="4" y1="4" x2="16" y2="16" />
+                  <line x1="16" y1="4" x2="4" y2="16" />
+                </>
+              ) : (
+                <>
+                  <line x1="3" y1="6" x2="17" y2="6" />
+                  <line x1="3" y1="10" x2="17" y2="10" />
+                  <line x1="3" y1="14" x2="17" y2="14" />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
       </nav>
+
+      {/* ── Mobile slide-down menu ── */}
+      <div
+        className={`sm:hidden overflow-hidden transition-all duration-300 ${
+          mobileOpen ? "max-h-60 border-b border-border/30" : "max-h-0"
+        } bg-c29-bg/90 backdrop-blur-xl`}
+      >
+        <div className="flex flex-col gap-1 px-6 py-3">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className={`rounded-lg px-3 py-2 font-mono text-xs uppercase tracking-wider transition-colors ${
+                active === link.href.slice(1)
+                  ? "text-foreground bg-foreground/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      </div>
     </header>
   );
 }

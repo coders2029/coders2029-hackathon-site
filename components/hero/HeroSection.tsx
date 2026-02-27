@@ -63,8 +63,15 @@ export default function HeroSection({ className }: { className?: string }) {
 
         <AnimatedText delay={1000}>
           <p className="max-w-lg text-base text-muted-foreground sm:text-lg">
-            Learn together. Build together. Our first event — a 12-hour
-            Hackathon exclusively for First Year Engineering.
+            Learn together. Build together. Our first event —{" "}
+            <span className="text-foreground font-semibold">FE Hack</span>, a
+            12-hour Hackathon exclusively for First Year Engineering.
+          </p>
+        </AnimatedText>
+
+        <AnimatedText delay={1150}>
+          <p className="font-mono text-sm tracking-wide text-muted-foreground">
+            21st March 2026 · Saturday · 9 AM – 9 PM
           </p>
         </AnimatedText>
 

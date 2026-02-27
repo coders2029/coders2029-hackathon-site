@@ -32,7 +32,9 @@ export default async function TeamPage({ params }: Props) {
 
   // Fetch team details from our API route so client navigation resolves reliably
   const baseUrl =
-    process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "http://localhost:3000";
   const apiUrl = new URL(`/api/team/${code}`, baseUrl).toString();
 
   const res = await fetch(apiUrl, {
@@ -48,7 +50,8 @@ export default async function TeamPage({ params }: Props) {
         <div className="max-w-xl text-center">
           <h1 className="text-2xl font-bold">{message}</h1>
           <p className="mt-2 text-muted-foreground">
-            No team matches the code <strong className="font-mono">{code}</strong>.
+            No team matches the code{" "}
+            <strong className="font-mono">{code}</strong>.
           </p>
           <div className="mt-6">
             <Link href="/" className="text-foreground underline">
@@ -60,15 +63,30 @@ export default async function TeamPage({ params }: Props) {
     );
   }
 
-  const { team } = await res.json();
+  const { team } = (await res.json()) as {
+    team: {
+      teamName: string;
+      joinCode: string;
+      participation: string;
+      members: {
+        id: string;
+        fullName: string;
+        rollNumber: string;
+        isLead: boolean;
+      }[];
+    };
+  };
 
   return (
     <main className="min-h-screen p-8">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-3xl font-bold">
-          {team.teamName ?? "Unnamed Team"} <span className="font-mono text-sm ml-3">{team.joinCode}</span>
+          {team.teamName ?? "Unnamed Team"}{" "}
+          <span className="font-mono text-sm ml-3">{team.joinCode}</span>
         </h1>
-        <p className="mt-2 text-muted-foreground">Participation: {team.participation}</p>
+        <p className="mt-2 text-muted-foreground">
+          Participation: {team.participation}
+        </p>
 
         <section className="mt-8 space-y-4">
           <h2 className="text-xl font-semibold">Members</h2>
@@ -78,7 +96,9 @@ export default async function TeamPage({ params }: Props) {
                 <li key={m.id} className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">{m.fullName}</div>
-                    <div className="text-sm text-muted-foreground">{m.rollNumber}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {m.rollNumber}
+                    </div>
                   </div>
                   <div className="text-sm font-mono text-foreground">
                     {m.isLead ? "Lead" : "Member"}

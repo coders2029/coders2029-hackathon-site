@@ -17,11 +17,8 @@ export default function Footer() {
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">
         {/* Wordmark */}
         <div>
-          <p className="font-mono text-lg font-bold text-foreground">
-            Coders2029
-          </p>
           <p className="text-xs text-muted-foreground">
-            SPIT FY Coding Community — made by students, for students.
+            Coders 2029 — made by students, for students.
           </p>
         </div>
 
@@ -46,7 +43,7 @@ export default function Footer() {
             Register
           </a>
           <a
-            href="https://github.com"
+            href="https://github.com/coders-2029"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-foreground transition-colors duration-300"

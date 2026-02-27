@@ -4,7 +4,13 @@ import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const SECRET = new TextEncoder().encode(process.env.AUTH_SECRET);
+const rawSecret = process.env.AUTH_SECRET || process.env.SECRET_AUTH;
+if (!rawSecret || rawSecret.length === 0) {
+  throw new Error(
+    "Missing or empty AUTH_SECRET. Set AUTH_SECRET in your environment or .env file.",
+  );
+}
+const SECRET = new TextEncoder().encode(rawSecret);
 const COOKIE_NAME = "session";
 
 /* ─── Password helpers ─── */
